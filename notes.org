@@ -83,10 +83,10 @@ Basic ideas:
 ** DONE Emit formatted markdown from document module
 ** DONE =release V= to replace =unchanged= with version and date
 Drop any empty change sections
-** TODO Implement merge of document 2 model
-** TODO =version V[..V']= subcommand extracts just the part of the changelog relevant for the version (range?)
-** TODO Populate unchanged with supported change kinds
-** TODO Add =merge= subcommand for git merge drier
+** DONE =version V[..V']= subcommand extracts just the part of the changelog relevant for the version (range?)
+** DONE Populate unchanged with supported change kinds
+** TODO Implement merge of document models
+** TODO Add =merge= subcommand for git merge driver
 
 Possible arguments:
 

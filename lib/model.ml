@@ -52,6 +52,8 @@ module Change = struct
         (* Converting via to_seq ensures we get the items in the right order,
            converting directly `to_list` gives an undefined order. *)
         to_seq t |> Seq.to_list |> List.concat_map change_to_md
+
+    let remove_empty t = filter (fun _ changes -> not (List.is_empty changes)) t
   end
 end
 
@@ -83,7 +85,15 @@ module ApalacheChange = struct
   end
 end
 
+(** Get the id from a version header, if possible *)
+let version_id : elem -> string option = function
+  | H2 id -> Some (Omd.to_text id)
+  | _     -> None
+
 module Release = struct
+  (* TODO: Actually parse out version data into a useful structure,
+     this will be necessary for cleaner version extraction and for
+     any automated link generation. *)
   type t =
     { version : elem
     ; summary : md  (** An optional summary of the version *)
@@ -106,10 +116,13 @@ module Release = struct
   let set_version v t =
     let version : elem = H2 [ Text v ] in
     (* Remove any change sections without content *)
-    let changes =
-      Change.Map.filter (fun _ changes -> not (List.is_empty changes)) t.changes
-    in
+    let changes = Change.Map.remove_empty t.changes in
     { t with version; changes }
+
+  let is_for_version v t =
+    match version_id t.version with
+    | None    -> false
+    | Some v' -> String.equal v v'
 end
 
 type t =
@@ -167,13 +180,11 @@ let unreleased_id = "Unreleased"
 
 let is_unreleased_id s = String.equal s unreleased_id
 
-let is_unreleased_version_header : elem -> bool = function
-  | H2 [ Omd.Ref (_, id, ref_id, _) ] ->
-      is_unreleased_id id && is_unreleased_id ref_id
-  | H2 [ Omd.Url (_, [ Omd.Text id ], _) ]
-  | H2 [ Omd.Text id ] ->
-      is_unreleased_id id
-  | _ -> false
+let is_unreleased_version_header : elem -> bool =
+ fun e ->
+  match version_id e with
+  | None   -> false
+  | Some v -> is_unreleased_id v
 
 let%test_unit "Unreleased header" =
   let is_valid s =
@@ -289,3 +300,13 @@ let release : version:string -> t -> t =
     unreleased = Release.empty
   ; releases = Release.set_version version t.unreleased :: t.releases
   }
+
+let get_version : version:string -> t -> Release.t option =
+ fun ~version t ->
+  List.find_map
+    (fun r ->
+      if Release.is_for_version version r then
+        Some { r with changes = Change.Map.remove_empty r.changes }
+      else
+        None)
+    (t.unreleased :: t.releases)

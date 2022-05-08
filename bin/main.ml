@@ -49,11 +49,26 @@ let release =
      in
      Release.run changelog version
 
+let version =
+  cmd
+    ~name:"version"
+    ~doc:"Extracts just the changes for VERSION from CHANGELOG"
+  @@ let+ changelog = changelog
+     and+ version =
+       Required.pos
+         "VERSION"
+         ~doc:"The version to be released"
+         ~nth:1
+         ~conv:Arg.string
+         ()
+     in
+     Version.run changelog version
+
 let main () =
   Exec.commands
     ~name:"changeling"
     ~version:"0.0.1"
     ~doc:"Harmonize changelogs"
-    [ format; release ]
+    [ format; release; version ]
 
 let () = main ()
