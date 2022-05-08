@@ -20,6 +20,7 @@
    kwdcmd                       ; pinned
   (omd (= 1.3.1))
   (bos (>= 0.2.1))
+  (containers (>= 3.7))
 
   ; Preprocessing
   (ppx_deriving (and (>= 5.2.1) (< 6.0.0)))
