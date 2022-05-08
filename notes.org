@@ -76,6 +76,10 @@ Basic ideas:
 
 ** DONE Design a cannonical changelog document model
 [[file:lib/model.ml][document model]]
+** TODO Add Kwdcmd CLI frontend
+** TODO Implement cram testing
+** TODO Add =parse= command
+** TODO Implement parsing of document module
 ** TODO Implement merge of document 2 model
 ** TODO =init= subcommand installs custom merge strategy for change log
 
