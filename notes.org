@@ -78,7 +78,9 @@ Basic ideas:
 [[file:lib/model.ml][document model]]
 ** TODO Add Kwdcmd CLI frontend
 ** TODO Implement cram testing
-** TODO Add =parse= command
+** TODO Add =normalize= command
+- Parse into document model
+- Output markdown
 ** TODO Implement parsing of document module
 ** TODO Implement merge of document 2 model
 ** TODO =init= subcommand installs custom merge strategy for change log
@@ -112,8 +114,8 @@ Drop any empty change sections
 
 Must take arguments:
 
-- =%O= :: old version
-- =%A= :: current version
+- =%O= :: ancestor version
+- =%A= :: current version (overwrite this to resolve merge)
 - =%B= :: new (other branches') version
 - =%L= :: "conflict marker size"
 - =%P= :: pathname where the merged result will be stored
