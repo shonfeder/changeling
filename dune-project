@@ -28,6 +28,7 @@
 
   ;  Testing
   (ppx_expect (>= v0.15.0))
+  (ppx_inline_test (>= v0.15.0))
   (alcotest :with-test)
   (qcheck :with-test)
   (qcheck-alcotest :with-test)
