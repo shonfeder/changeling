@@ -15,6 +15,7 @@
  (depends
   (dune (> 2.9))
   ocaml
+  (omd (= 1.3.1))
   (alcotest :with-test)
   (qcheck :with-test)
   (qcheck-alcotest :with-test)
