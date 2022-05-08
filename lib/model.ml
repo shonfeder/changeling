@@ -18,7 +18,7 @@ module Change = struct
       | Removed
       | Fixed
       | Security
-    [@@deriving eq, ord, show {with_path = false}, enum]
+    [@@deriving eq, ord, show { with_path = false }, enum]
   end
 
   include T
@@ -92,6 +92,24 @@ module Release = struct
 
   let to_md { version; summary; changes } =
     (version :: summary) @ Change.Map.to_md changes
+
+  let empty =
+    let version : elem = H2 [ Text "Unreleased" ] in
+    let changes =
+      List.fold_left
+        (fun m c -> Change.Map.add c [] m)
+        Change.Map.empty
+        Change.all
+    in
+    { version; summary = []; changes }
+
+  let set_version v t =
+    let version : elem = H2 [ Text v ] in
+    (* Remove any change sections without content *)
+    let changes =
+      Change.Map.filter (fun _ changes -> not (List.is_empty changes)) t.changes
+    in
+    { t with version; changes }
 end
 
 type t =
@@ -264,3 +282,10 @@ let to_string : t -> string =
   let releases = List.concat_map Release.to_md releases in
   let md : md = (title :: NL :: summary) @ unreleased @ releases in
   Omd.to_markdown md
+
+let release : version:string -> t -> t =
+ fun ~version t ->
+  { t with
+    unreleased = Release.empty
+  ; releases = Release.set_version version t.unreleased :: t.releases
+  }

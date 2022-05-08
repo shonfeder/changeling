@@ -2,6 +2,14 @@ open Kwdcmd
 
 let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 
+let changelog =
+  Required.pos
+    "CHANGELOG"
+    ~doc:"The changelog file to format"
+    ~nth:0
+    ~conv:fpath_conv
+    ()
+
 let format =
   cmd
     ~name:"format"
@@ -19,27 +27,33 @@ let format =
            the command is a noop and exits with [0]."
       ]
   @@ (* TODO: Should this be configurable? *)
-  let+ file =
-    Required.pos
-      "CHANGELOG"
-      ~doc:"The changelog file to format"
-      ~nth:0
-      ~conv:fpath_conv
-      ()
+  let+ changelog = changelog
   and+ fix =
     Optional.flag
       ~flags:[ "fix"; "f" ]
       ~doc:"overwrite file with normalized formatting, if needed"
       ()
   in
-  Format.run file fix
+  Format.run changelog fix
 
+let release =
+  cmd ~name:"release" ~doc:"Update the CHANGELOG for the release of VERSION"
+  @@ let+ changelog = changelog
+     and+ version =
+       Required.pos
+         "VERSION"
+         ~doc:"The version to be released"
+         ~nth:1
+         ~conv:Arg.string
+         ()
+     in
+     Release.run changelog version
 
 let main () =
   Exec.commands
     ~name:"changeling"
     ~version:"0.0.1"
     ~doc:"Harmonize changelogs"
-    [ format ]
+    [ format; release ]
 
 let () = main ()
