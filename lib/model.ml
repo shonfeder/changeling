@@ -18,7 +18,7 @@ module Change = struct
       | Removed
       | Fixed
       | Security
-    [@@deriving eq, ord, show, enum]
+    [@@deriving eq, ord, show {with_path = false}, enum]
   end
 
   include T
@@ -43,6 +43,15 @@ module Change = struct
     include Map.Make (T)
 
     type nonrec t = md t
+
+    let to_md : t -> md =
+      let change_to_md : T.t * md -> md =
+       fun (change, changes) -> H3 [ Text (show change) ] :: changes
+      in
+      fun t ->
+        (* Converting via to_seq ensures we get the items in the right order,
+           converting directly `to_list` gives an undefined order. *)
+        to_seq t |> Seq.to_list |> List.concat_map change_to_md
   end
 end
 
@@ -74,33 +83,40 @@ module ApalacheChange = struct
   end
 end
 
-type version =
-  { id : string  (** The version number (or "unreleased") *)
-  ; date : string option  (** The date when the version was released *)
-  ; summary : md  (** An optional summary of the version *)
-  ; changes : Change.Map.t  (** A map of change kinds to change lists *)
-  }
+module Release = struct
+  type t =
+    { version : elem
+    ; summary : md  (** An optional summary of the version *)
+    ; changes : Change.Map.t  (** A map of change kinds to change lists *)
+    }
+
+  let to_md { version; summary; changes } =
+    (version :: summary) @ Change.Map.to_md changes
+end
 
 type t =
   { title : elem  (** The title of the changelog (defaults to "Changelog")*)
   ; summary : md  (** Summary of the change log *)
-  ; unreleased : version  (** The not-yet released set of changes *)
-  ; releases : version list  (** All the versions that have been released *)
+  ; unreleased : Release.t  (** The not-yet released set of changes *)
+  ; releases : Release.t list  (** All the versions that have been released *)
   }
 
+(** TODO Replace manual parsing with monadic parsing *)
 module Parser = struct
   type 'a t = Omd_representation.element list -> ('a, string) Result.t
 
   let return x = Ok x
+
   let bind f x =
     let open Result.Infix in
-    let+ (r, rest) = x in
+    let+ r, rest = x in
     (r, f rest)
 
-  let map f x = Result.map (fun (r, rest) -> (r, f rest) ) x
+  let map f x = Result.map (fun (r, rest) -> (r, f rest)) x
 
-  let (let*) = bind
-  let (let+) x f = map f x
+  let ( let* ) = bind
+
+  let ( let+ ) x f = map f x
 end
 
 let parse_title (title : elem) =
@@ -191,11 +207,11 @@ let parse_changes md =
   in
   aux Change.Map.empty md
 
-let parse_unreleased : (version * md) parser = function
-  | []         -> Error "missing '## Unreleased' section"
-  | hd :: rest ->
-      if not (is_unreleased_version_header hd) then
-        let wrong = Omd.to_markdown [ hd ] |> String.trim in
+let parse_unreleased : (Release.t * md) parser = function
+  | []              -> Error "missing '## Unreleased' section"
+  | version :: rest ->
+      if not (is_unreleased_version_header version) then
+        let wrong = Omd.to_markdown [ version ] |> String.trim in
         Error [%string "expected '## Unreleased' section but found '%{wrong}'"]
       else
         let open Result.Infix in
@@ -206,10 +222,29 @@ let parse_unreleased : (version * md) parser = function
           List.take_drop_while (not % is_version_header) rest
         in
         let* changes = parse_changes changes_md in
-        let version = { id = unreleased_id; date = None; summary; changes } in
-        Ok (version, rest)
+        let release = Release.{ version; summary; changes } in
+        Ok (release, rest)
 
-let parse_releases _ = raise (Failure "TODO releases")
+let rec parse_releases : Release.t list parser = function
+  | []              -> Ok []
+  | version :: rest ->
+      if not (is_version_header version) then
+        let wrong = Omd.to_markdown [ version ] |> String.trim in
+        Error
+          [%string
+            "expected valid '## l.m.n' release section but found '%{wrong}'"]
+      else
+        let open Result.Infix in
+        let summary, rest =
+          List.take_drop_while (not % is_change_header) rest
+        in
+        let changes_md, rest =
+          List.take_drop_while (not % is_version_header) rest
+        in
+        let* changes = parse_changes changes_md in
+        let release = Release.{ version; summary; changes } in
+        let* releases = parse_releases rest in
+        Ok (release :: releases)
 
 let parse : string -> (t, string) Result.t =
  fun content ->
@@ -222,3 +257,10 @@ let parse : string -> (t, string) Result.t =
       let* unreleased, rest = parse_unreleased rest in
       let+ releases = parse_releases rest in
       { title; summary; unreleased; releases }
+
+let to_string : t -> string =
+ fun { title; summary; unreleased; releases } ->
+  let unreleased = Release.to_md unreleased in
+  let releases = List.concat_map Release.to_md releases in
+  let md : md = (title :: NL :: summary) @ unreleased @ releases in
+  Omd.to_markdown md

@@ -76,13 +76,33 @@ Basic ideas:
 
 ** DONE Design a cannonical changelog document model
 [[file:lib/model.ml][document model]]
-** TODO Add Kwdcmd CLI frontend
-** TODO Implement cram testing
-** TODO Add =normalize= command
-- Parse into document model
-- Output markdown
-** TODO Implement parsing of document module
+** DONE Add Kwdcmd CLI frontend
+** DONE Implement cram testing
+** DONE Add =format= command
+** DONE Implement parsing of document module
+** DONE Emit formatted markdown from document module
+** TODO =release V= to replace =unchanged= with version and date
+Drop any empty change sections
 ** TODO Implement merge of document 2 model
+** TODO Populate unchanged with supported change kinds
+** TODO =version V[..V']= subcommand extracts just the part of the changelog relevant for the version (range?)
+** TODO Add =merge= subcommand for git merge drier
+
+Possible arguments:
+
+- =%O= :: ancestor version
+- =%A= :: current version (overwrite this to resolve merge)
+- =%B= :: new (other branches') version
+- =%L= :: "conflict marker size"
+- =%P= :: pathname where the merged result will be stored
+
+#+begin_quote
+The merge.*.driver variable’s value is used to construct a command to run to merge ancestor’s version (=%O=), current version (=%A=) and the other branches' version (=%B=). These three tokens are replaced with the names of temporary files that hold the contents of these versions when the command line is built. Additionally, =%L= will be replaced with the conflict marker size (see below).
+
+The merge driver is expected to leave the result of the merge in the file named with =%A= by overwriting it, and exit with zero status if it managed to merge them cleanly, or non-zero if there were conflicts.
+#+end_quote
+
+https://git-scm.com/docs/gitattributes#_defining_a_custom_merge_driver
 ** TODO =init= subcommand installs custom merge strategy for change log
 
 #+begin_src markdown
@@ -105,25 +125,3 @@ project's =.gitattributes= file:
 #+begin_src
 CANGES.md merge=filfre
 #+end_src
-
-** TODO Populate unchanged with supported change kinds
-** TODO =release V= to replace =unchanged= with version and date
-Drop any empty change sections
-** TODO =version V[..V']= subcommand extracts just the part of the changelog relevant for the version (range?)
-** TODO Add =merge= subcommand for git mege drier
-
-Must take arguments:
-
-- =%O= :: ancestor version
-- =%A= :: current version (overwrite this to resolve merge)
-- =%B= :: new (other branches') version
-- =%L= :: "conflict marker size"
-- =%P= :: pathname where the merged result will be stored
-
-#+begin_quote
-The merge.*.driver variable’s value is used to construct a command to run to merge ancestor’s version (=%O=), current version (=%A=) and the other branches' version (=%B=). These three tokens are replaced with the names of temporary files that hold the contents of these versions when the command line is built. Additionally, =%L= will be replaced with the conflict marker size (see below).
-
-The merge driver is expected to leave the result of the merge in the file named with =%A= by overwriting it, and exit with zero status if it managed to merge them cleanly, or non-zero if there were conflicts.
-#+end_quote
-
-https://git-scm.com/docs/gitattributes#_defining_a_custom_merge_driver
