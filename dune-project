@@ -14,9 +14,12 @@
  (description "Longer description")
  (depends
   (dune (> 2.9))
-  ocaml
+   ocaml
   (omd (= 1.3.1))
+
+   kwdcmd                       ; pinned
   (ppx_deriving (and (>= 5.2.1) (< 6.0.0)))
+
   (alcotest :with-test)
   (qcheck :with-test)
   (qcheck-alcotest :with-test)
