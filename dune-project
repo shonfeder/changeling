@@ -15,11 +15,16 @@
  (depends
   (dune (> 2.9))
    ocaml
-  (omd (= 1.3.1))
 
+   ; Libraies
    kwdcmd                       ; pinned
+  (omd (= 1.3.1))
+  (bos (>= 0.2.1))
+
+  ; Preprocessing
   (ppx_deriving (and (>= 5.2.1) (< 6.0.0)))
 
+  ;  Testing
   (alcotest :with-test)
   (qcheck :with-test)
   (qcheck-alcotest :with-test)
