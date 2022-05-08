@@ -1,2 +1,3 @@
 (library
- (name changeling))
+ (name changeling)
+ (libraries omd))
