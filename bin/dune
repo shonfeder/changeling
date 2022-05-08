@@ -1,4 +1,4 @@
 (executable
  (public_name changeling)
  (name main)
- (libraries changeling))
+ (libraries changeling kwdcmd))

@@ -1,0 +1,3 @@
+pin-depends: [
+  ["kwdcmd.dev" "git+https://github.com/shonfeder/kwdcmd.git"]
+]
