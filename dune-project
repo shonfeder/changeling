@@ -27,6 +27,7 @@
   (ppx_string (>= v0.15.0))
 
   ;  Testing
+  (ppx_expect (>= v0.15.0))
   (alcotest :with-test)
   (qcheck :with-test)
   (qcheck-alcotest :with-test)
