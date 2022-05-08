@@ -74,7 +74,8 @@ Basic ideas:
 
 * Tasks
 
-** TODO Design a cannonical changelog document model
+** DONE Design a cannonical changelog document model
+[[file:lib/model.ml][document model]]
 ** TODO Implement merge of document 2 model
 ** TODO =init= subcommand installs custom merge strategy for change log
 

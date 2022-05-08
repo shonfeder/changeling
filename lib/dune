@@ -1,3 +1,7 @@
 (library
  (name changeling)
- (libraries omd))
+ (libraries omd)
+ (preprocess (pps
+              ppx_deriving.ord
+              ppx_deriving.eq
+              ppx_deriving.make)))
