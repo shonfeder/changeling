@@ -3,6 +3,29 @@
 open Containers
 open Fun.Infix
 
+module Omd = struct
+  module T = struct
+    include Omd
+
+    let compare : t -> t -> int =
+     fun a b -> String.compare (Omd.to_text a) (Omd.to_text b)
+  end
+
+  module Elem = struct
+    module T = struct
+      type t = Omd_representation.element
+
+      let compare : t -> t -> int =
+       fun a b -> String.compare (Omd.to_markdown [ a ]) (Omd.to_markdown [ b ])
+    end
+
+    module Set = Set.Make (T)
+  end
+
+  include T
+  module Set = Set.Make (T)
+end
+
 type elem = Omd_representation.element
 
 type md = Omd.t
@@ -36,8 +59,10 @@ module Change = struct
     | "Fixed"      -> Ok Fixed
     | "Security"   -> Ok Security
     | invalid      ->
-        Error
-          [%string "invalid change '%{invalid}' expected one of %{all_allowed}"]
+        Rresult.R.error_msg
+          [%string
+            "[invalid structure] invalid change '%{invalid}' expected one of \
+             %{all_allowed}"]
 
   module Map = struct
     include Map.Make (T)
@@ -54,6 +79,21 @@ module Change = struct
         to_seq t |> Seq.to_list |> List.concat_map change_to_md
 
     let remove_empty t = filter (fun _ changes -> not (List.is_empty changes)) t
+
+    (* TODO This should actually walk the AST and do a clevar merge on mergable structures *)
+    let merge_changes _ a b =
+      match (a, b) with
+      | None, c
+      | c, None ->
+          c
+      | Some a, Some b ->
+      match (a, b) with
+      | [ Omd.Ul a_items ], [ Ul b_items ] ->
+          Some
+            [ Omd.Ul
+                Omd.Set.(union (of_list a_items) (of_list b_items) |> to_list)
+            ]
+      | a, b -> Some Omd.Elem.Set.(union (of_list a) (of_list b) |> to_list)
   end
 end
 
@@ -123,6 +163,23 @@ module Release = struct
     match version_id t.version with
     | None    -> false
     | Some v' -> String.equal v v'
+
+  let merge : t -> t -> (t, _) Result.t =
+   fun t t' ->
+    let v = Omd.to_markdown [ t.version ] |> String.trim in
+    let v' = Omd.to_markdown [ t'.version ] |> String.trim in
+    if not (String.equal v v') then
+      Rresult.R.error_msgf "versions conflict: '%s' <> '%s'" v v'
+    else
+      let s = Omd.to_markdown t.summary |> String.trim in
+      let s' = Omd.to_markdown t'.summary |> String.trim in
+      if not (String.equal s s') then
+        Rresult.R.error_msgf "release summaries conflict: '%s' <> '%s'" s s'
+      else
+        let changes =
+          Change.Map.merge Change.Map.merge_changes t.changes t'.changes
+        in
+        Ok { t with changes }
 end
 
 type t =
@@ -155,7 +212,9 @@ let parse_title (title : elem) =
   | H1 _  -> Ok title
   | wrong ->
       let wrongmd = Omd.to_markdown [ wrong ] |> String.trim in
-      Error [%string "expected '# Some title' but found '%{wrongmd}'"]
+      Rresult.R.error_msg
+        [%string
+          "[invalid structure] expected '# Some title' but found '%{wrongmd}'"]
 
 let is_blank_line : elem -> bool = function
   | NL
@@ -174,7 +233,7 @@ let is_change_header : elem -> bool = function
 let parse_summay md =
   Result.return @@ List.take_drop_while (not % is_version_header) md
 
-type 'a parser = Omd_representation.element list -> ('a, string) Result.t
+type 'a parser = Omd_representation.element list -> ('a, Rresult.R.msg) Result.t
 
 let unreleased_id = "Unreleased"
 
@@ -232,16 +291,21 @@ let parse_changes md =
         aux change_map rest
     | hd :: _ ->
         let wrong = Omd.to_markdown [ hd ] |> String.trim in
-        Error [%string "expected change header but found '%{wrong}'"]
+        Rresult.R.error_msg
+          [%string
+            "[invalid struture] expected change header but found '%{wrong}'"]
   in
   aux Change.Map.empty md
 
 let parse_unreleased : (Release.t * md) parser = function
-  | []              -> Error "missing '## Unreleased' section"
+  | []              -> Rresult.R.error_msg "missing '## Unreleased' section"
   | version :: rest ->
       if not (is_unreleased_version_header version) then
         let wrong = Omd.to_markdown [ version ] |> String.trim in
-        Error [%string "expected '## Unreleased' section but found '%{wrong}'"]
+        Rresult.R.error_msg
+          [%string
+            "[invalid structure] expected '## Unreleased' section but found \
+             '%{wrong}'"]
       else
         let open Result.Infix in
         let summary, rest =
@@ -259,9 +323,10 @@ let rec parse_releases : Release.t list parser = function
   | version :: rest ->
       if not (is_version_header version) then
         let wrong = Omd.to_markdown [ version ] |> String.trim in
-        Error
+        Rresult.R.error_msg
           [%string
-            "expected valid '## l.m.n' release section but found '%{wrong}'"]
+            "[invalid structure] expected valid '## l.m.n' release section but \
+             found '%{wrong}'"]
       else
         let open Result.Infix in
         let summary, rest =
@@ -275,10 +340,10 @@ let rec parse_releases : Release.t list parser = function
         let* releases = parse_releases rest in
         Ok (release :: releases)
 
-let parse : string -> (t, string) Result.t =
+let parse : string -> (t, _) Result.t =
  fun content ->
   Omd.of_string content |> List.filter (not % is_blank_line) |> function
-  | []            -> Error "empty changelog"
+  | []            -> Error (`Msg "[invalid structure] empty changelog")
   | title :: rest ->
       let open Result.Infix in
       let* title = parse_title title in
@@ -310,3 +375,22 @@ let get_version : version:string -> t -> Release.t option =
       else
         None)
     (t.unreleased :: t.releases)
+
+let merge : t -> t -> (t, _) Result.t =
+ fun t t' ->
+  let title = Omd.to_markdown [ t.title ] |> String.trim in
+  let title' = Omd.to_markdown [ t'.title ] |> String.trim in
+  if not (String.equal title title') then
+    Rresult.R.error_msgf "titles conflict: '%s' <> '%s'" title title'
+  else
+    let summary = Omd.to_markdown t.summary |> String.trim in
+    let summary' = Omd.to_markdown t'.summary |> String.trim in
+    if not (String.equal summary summary') then
+      Rresult.R.error_msgf "summaries conflict: '%s' <> '%s'" summary summary'
+    else
+      let open Result.Infix in
+      let* unreleased = Release.merge t.unreleased t'.unreleased in
+      let* releases =
+        List.map2 Release.merge t.releases t'.releases |> Result.flatten_l
+      in
+      Ok { t with unreleased; releases }

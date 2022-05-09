@@ -5,7 +5,7 @@ let run : Fpath.t -> string -> (unit, _) Kwdcmd.cmd_result =
  fun changelog version ->
   let open Result.Infix in
   let* content = Bos.OS.File.read changelog in
-  let* model = Model.parse content |> Result.map_err (fun m -> `Msg m) in
+  let* model = Model.parse content in
   model
   |> Model.release ~version
   |> Model.to_string

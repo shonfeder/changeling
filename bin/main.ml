@@ -2,11 +2,11 @@ open Kwdcmd
 
 let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 
-let changelog =
+let changelog ?(name = "CHANGELOG") ?(nth=0) () =
   Required.pos
-    "CHANGELOG"
+    name
     ~doc:"The changelog file to format"
-    ~nth:0
+    ~nth
     ~conv:fpath_conv
     ()
 
@@ -27,7 +27,7 @@ let format =
            the command is a noop and exits with [0]."
       ]
   @@ (* TODO: Should this be configurable? *)
-  let+ changelog = changelog
+  let+ changelog = changelog ()
   and+ fix =
     Optional.flag
       ~flags:[ "fix"; "f" ]
@@ -38,7 +38,7 @@ let format =
 
 let release =
   cmd ~name:"release" ~doc:"Update the CHANGELOG for the release of VERSION"
-  @@ let+ changelog = changelog
+  @@ let+ changelog = changelog ()
      and+ version =
        Required.pos
          "VERSION"
@@ -53,7 +53,7 @@ let version =
   cmd
     ~name:"version"
     ~doc:"Extracts just the changes for VERSION from CHANGELOG"
-  @@ let+ changelog = changelog
+  @@ let+ changelog = changelog ()
      and+ version =
        Required.pos
          "VERSION"
@@ -64,11 +64,17 @@ let version =
      in
      Version.run changelog version
 
+let merge =
+  cmd ~name:"merge" ~doc:"Merge two changelogs into stdout"
+  @@ let+ changelog_a = changelog ~name:"CHANGELOG_A" ~nth:0 ()
+     and+ changelog_b = changelog ~name:"CHANGELOG_B" ~nth:1 () in
+     Merge.run changelog_a changelog_b
+
 let main () =
   Exec.commands
     ~name:"changeling"
     ~version:"0.0.1"
     ~doc:"Harmonize changelogs"
-    [ format; release; version ]
+    [ format; release; version; merge ]
 
 let () = main ()

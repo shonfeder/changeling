@@ -1,7 +1,7 @@
 (library
  (name changeling)
  (inline_tests)
- (libraries omd containers)
+ (libraries omd containers rresult)
  (preprocess (pps
               ppx_deriving.std
               ppx_expect

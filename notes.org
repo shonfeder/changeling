@@ -85,7 +85,7 @@ Basic ideas:
 Drop any empty change sections
 ** DONE =version V[..V']= subcommand extracts just the part of the changelog relevant for the version (range?)
 ** DONE Populate unchanged with supported change kinds
-** TODO Implement merge of document models
+** DONE Implement merge of document models
 ** TODO Add =merge= subcommand for git merge driver
 
 Possible arguments:
@@ -103,6 +103,7 @@ The merge driver is expected to leave the result of the merge in the file named 
 #+end_quote
 
 https://git-scm.com/docs/gitattributes#_defining_a_custom_merge_driver
+** TODO Add support for normal merging of text blocks?
 ** TODO =init= subcommand installs custom merge strategy for change log
 
 #+begin_src markdown
