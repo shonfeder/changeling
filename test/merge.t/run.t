@@ -38,6 +38,49 @@ Can merge two compatible files
   ### Fixed
   - Some stuff
   
+
+Can merge two files into a given destination
+
+  $ changeling merge changes_a.md changes_b.md --out changes_c.md
+  $ cat changes_c.md
+  # Changelog
+  
+  Some summary data.
+  
+  ## Unreleased
+  ### Added
+  - Cooking
+  - Hair
+  - Sports
+  
+  ### Changed
+  - Altered
+  
+  ### Deprecated
+  ### Removed
+  - Clouds
+  - Dishes
+  - Plants
+  
+  ### Fixed
+  ### Security
+  ## 1.1.1
+  Version summary
+  
+  ### Added
+  - Bar
+  - Baz
+  - Foo
+  
+  ### Removed
+  - Zoo
+  - Zar
+  - Zaz
+  
+  ### Fixed
+  - Some stuff
+  
+
 Trying to merge incompatible files produces an error
 
   $ changeling merge changes_a.md title_conflict.md

@@ -2,13 +2,8 @@ open Kwdcmd
 
 let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 
-let changelog ?(name = "CHANGELOG") ?(nth=0) () =
-  Required.pos
-    name
-    ~doc:"The changelog file to format"
-    ~nth
-    ~conv:fpath_conv
-    ()
+let changelog ?(name = "CHANGELOG") ?(nth = 0) () =
+  Required.pos name ~doc:"The changelog file to format" ~nth ~conv:fpath_conv ()
 
 let format =
   cmd
@@ -67,14 +62,31 @@ let version =
 let merge =
   cmd ~name:"merge" ~doc:"Merge two changelogs into stdout"
   @@ let+ changelog_a = changelog ~name:"CHANGELOG_A" ~nth:0 ()
-     and+ changelog_b = changelog ~name:"CHANGELOG_B" ~nth:1 () in
-     Merge.run changelog_a changelog_b
+     and+ changelog_b = changelog ~name:"CHANGELOG_B" ~nth:1 ()
+     and+ dest =
+       Optional.value
+         "DESTINATION"
+         ~flags:[ "out"; "o" ]
+         ~doc:
+           "Destination file to write merge result to. If omitted, writes \
+            merged result to stdout"
+         ~default:None
+         ~conv:Arg.(some fpath_conv)
+         ()
+     in
+
+     Merge.run changelog_a changelog_b dest
+
+let init =
+  cmd ~name:"init" ~doc:"Initialize the git config for use with changeling"
+  @@ let+ changelog = changelog () in
+     Init.run changelog
 
 let main () =
   Exec.commands
     ~name:"changeling"
     ~version:"0.0.1"
     ~doc:"Harmonize changelogs"
-    [ format; release; version; merge ]
+    [ format; release; version; merge; init ]
 
 let () = main ()

@@ -189,6 +189,21 @@ type t =
   ; releases : Release.t list  (** All the versions that have been released *)
   }
 
+let empty : t =
+  let summary =
+    {|All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+|}
+    |> Omd.of_string
+  in
+  { title = Omd.(H1 [ Text "Changelog" ])
+  ; summary
+  ; unreleased = Release.empty
+  ; releases = []
+  }
+
 (** TODO Replace manual parsing with monadic parsing *)
 module Parser = struct
   type 'a t = Omd_representation.element list -> ('a, string) Result.t
