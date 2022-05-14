@@ -1,6 +1,4 @@
-# Changeling
-
-Harmonize changelogs without mangling their purpose.
+# `changeling`: Harmonize changelogs without mangling their purpose.
 
 `changeling` follows [keep a changelog](https://keepachangelog.com/en/1.0.0/) in
 keeping the focus of the changelog process on human-to-human communication about
@@ -35,7 +33,44 @@ widespread:
 
 ## Caveats
 
-- The tool is in prototype stage.
+- The tool is currently in a prototyping stage.
 - The merging strategy is currently extremely naive and limited. It works fine
   for the usual changelog format according to my tests, but any fancy stuff
-  (like changelogs divided into subcomponents) is currently not supported.
+  (like changelogs divided into subcomponents) is currently not supported, and
+  even loosely packed unordered lists don't have support yet.
+
+## Installation
+
+Using [opam](https://opam.ocaml.org/doc/Install.html):
+
+```sh
+opam pin https://github.com/shonfeder/changeling.git
+```
+
+## Usage
+
+`changling` assumes you keep your changelogs in a format that is broadly consist
+with that advised by [keep a changelog][].
+
+### Installing in a project
+
+Initialize the tool on your projects by running:
+
+``` sh
+changeling init CHANGES.md
+```
+
+This will install changeling as a fallback merge driver for `CHANGES.md`, so
+that merge conflicts in the changelog will be resolved automatically.
+
+### Extract the changes for a version
+
+``` sh
+changeling version CHANGES.md <version>
+```
+
+### Promote `Unchnages` changes into release `<version>`
+
+``` sh
+changeling release CHANGES.md <version>
+```

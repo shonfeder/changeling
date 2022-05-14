@@ -2,6 +2,13 @@ open Kwdcmd
 
 let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 
+(** TODO Make config file configurable? *)
+let load_model file : ((module Changeling.Model.S), Rresult.R.msg) Result.t =
+  let open Containers.Result.Infix in
+  let+ config = Config.load ?file () in
+  let (module C) = Changeling.Change.make ?kinds:config.changes () in
+  (module Changeling.Model.Make (C) : Changeling.Model.S)
+
 let changelog ?(name = "CHANGELOG") ?(nth = 0) () =
   Required.pos name ~doc:"The changelog file to format" ~nth ~conv:fpath_conv ()
 
@@ -29,6 +36,10 @@ let format =
       ~doc:"overwrite file with normalized formatting, if needed"
       ()
   in
+  (* TODO DRY out the Model module making  *)
+  let open Containers.Result.Infix in
+  let* (module Model) = load_model None in
+  let module Format = Format.Make (Model) in
   Format.run changelog fix
 
 let release =
@@ -42,6 +53,9 @@ let release =
          ~conv:Arg.string
          ()
      in
+     let open Containers.Result.Infix in
+     let* (module Model) = load_model None in
+     let module Release = Release.Make (Model) in
      Release.run changelog version
 
 let version =
@@ -57,6 +71,9 @@ let version =
          ~conv:Arg.string
          ()
      in
+     let open Containers.Result.Infix in
+     let* (module Model) = load_model None in
+     let module Version = Version.Make (Model) in
      Version.run changelog version
 
 let merge =
@@ -74,12 +91,17 @@ let merge =
          ~conv:Arg.(some fpath_conv)
          ()
      in
-
+     let open Containers.Result.Infix in
+     let* (module Model) = load_model None in
+     let module Merge = Merge.Make (Model) in
      Merge.run changelog_a changelog_b dest
 
 let init =
   cmd ~name:"init" ~doc:"Initialize the git config for use with changeling"
   @@ let+ changelog = changelog () in
+     let open Containers.Result.Infix in
+     let* (module Model) = load_model None in
+     let module Init = Init.Make (Model) in
      Init.run changelog
 
 let main () =

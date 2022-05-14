@@ -4,34 +4,34 @@
 
 ** (R1) HARMONIZE MERGING
 
-Solve the changelog merge conflict problem
+- [x] Solve the changelog merge conflict problem
 
 ** (R2) PRIORITIZE HUMAN COMMUNICATION
 
-Support the [[https://keepachangelog.com/en/1.0.0/][keep a changelog]] paradigm of human-to-human communication for the
-focused on informing people about changes
+- [x] Support the [[https://keepachangelog.com/en/1.0.0/][keep a changelog]] paradigm of human-to-human communication for
+  the focused on informing people about changes
 
-   #+begin_quote
-   To make it easier for users and contributors to see precisely what notable
-   changes have been made between each release (or version) of the project.
-   #+end_quote
+  #+begin_quote
+  To make it easier for users and contributors to see precisely what notable
+  changes have been made between each release (or version) of the project.
+  #+end_quote
 
 ** (R3) CUSTOMARY PRACTICE
 
-Work seamless alongside the customary flat-file based changelog practice.
+- [x] Work seamless alongside the customary flat-file based changelog practice.
 
 ** (R4) AUTOMATE DEPLOYMENT
 
 Support automated deployment via
 
-- automating update of the =unreleased= section
-- extraction of changes for a particular version
+- [x] automating update of the =unreleased= section
+- [x] extraction of changes for a particular version
 
 * Bonus functionality
 
 ** (B1) AUTOMATE LINKING AND DATING
 
-- Support automated insertion of links to tag ranges and dates:
+- [ ] Support automated insertion of links to tag ranges and dates:
 
 #+begin_src markdown
 ## [Unreleased]
@@ -43,13 +43,13 @@ Support automated deployment via
 [1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.0...v1.0.0
 #+end_src
 
-- Automated linking of issue ids
-- Automated linking of user references
+- [ ] Automated linking of issue ids
+- [ ] Automated linking of user references
 
 ** (B2) LINTING
 
-- Support configurable list of allowed change types
-- Populate new unchanged with allowed kinds of changes
+- [x] Support configurable list of allowed change types
+- [x] Populate new unchanged with allowed kinds of changes
 
 * Design
 
@@ -62,7 +62,7 @@ Basic ideas:
 
 ** Configuration
 
-- [ ] Set changelog file (default: =CHANGES.md=)
+- [x] Set changelog file (default: =CHANGES.md=)
 - [ ] Configure allowed/default changes
 
 ** References
@@ -126,5 +126,8 @@ project's =.gitattributes= file:
 #+begin_src
 CANGES.md merge=filfre
 #+end_src
-** TODO Add support for normal merging of text blocks?
+** TODO Make change types configurable
+- [x] Load from config file
+- [ ] Make config file selectable by cli
 ** TODO Add more robust, recursive git merge strategy
+** TODO Add support for normal merging of text blocks?

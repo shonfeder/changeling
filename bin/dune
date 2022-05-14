@@ -1,5 +1,5 @@
 (executable
  (public_name changeling)
  (name main)
- (libraries changeling kwdcmd fpath bos)
- (preprocess (pps ppx_string)))
+ (libraries changeling kwdcmd fpath bos sexplib)
+ (preprocess (pps ppx_string ppx_sexp_conv)))
