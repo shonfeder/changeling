@@ -21,11 +21,12 @@
   (omd (= 1.3.1))
   (bos (>= 0.2.1))
   (containers (>= 3.7))
+  (sexplib (>= v0.15.0))
 
   ; Preprocessing
   (ppx_deriving (and (>= 5.2.1) (< 6.0.0)))
   (ppx_string (>= v0.15.0))
-  (ppx_sexp_conv (>= v0.15.1))
+  (ppx_sexp_conv (>= v0.15.0))
 
   ;  Testing
   (ppx_expect (>= v0.15.0))
