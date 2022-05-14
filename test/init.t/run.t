@@ -130,4 +130,16 @@ Checkout the trunk again, and add a different change
 Merge the conflicting branch, showing that the changeling driver kicks in
 
   $ git merge conflict -m "Merge changes"
+  Auto-merging CHANGES.md
+  Merge made by the 'ort' strategy.
+   CHANGES.md | 4 ++--
+   1 file changed, 2 insertions(+), 2 deletions(-)
   $ cat CHANGES.md
+  # Changelog
+  
+  ## Unreleased
+  ### Added
+  - Change 1
+  - Change 2
+  - Change 3
+  
