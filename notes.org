@@ -4,11 +4,11 @@
 
 ** (R1) HARMONIZE MERGING
 
-- [x] Solve the changelog merge conflict problem
+- [X] Solve the changelog merge conflict problem
 
 ** (R2) PRIORITIZE HUMAN COMMUNICATION
 
-- [x] Support the [[https://keepachangelog.com/en/1.0.0/][keep a changelog]] paradigm of human-to-human communication for
+- [X] Support the [[https://keepachangelog.com/en/1.0.0/][keep a changelog]] paradigm of human-to-human communication for
   the focused on informing people about changes
 
   #+begin_quote
@@ -18,14 +18,14 @@
 
 ** (R3) CUSTOMARY PRACTICE
 
-- [x] Work seamless alongside the customary flat-file based changelog practice.
+- [X] Work seamless alongside the customary flat-file based changelog practice.
 
 ** (R4) AUTOMATE DEPLOYMENT
 
 Support automated deployment via
 
-- [x] automating update of the =unreleased= section
-- [x] extraction of changes for a particular version
+- [X] automating update of the =unreleased= section
+- [X] extraction of changes for a particular version
 
 * Bonus functionality
 
@@ -48,8 +48,8 @@ Support automated deployment via
 
 ** (B2) LINTING
 
-- [x] Support configurable list of allowed change types
-- [x] Populate new unchanged with allowed kinds of changes
+- [X] Support configurable list of allowed change types
+- [X] Populate new unchanged with allowed kinds of changes
 
 * Design
 
@@ -62,8 +62,8 @@ Basic ideas:
 
 ** Configuration
 
-- [x] Set changelog file (default: =CHANGES.md=)
-- [ ] Configure allowed/default changes
+- [ ] Set changelog file (default: =CHANGES.md=)
+- [X] Configure allowed/default changes
 
 ** References
 
@@ -126,8 +126,9 @@ project's =.gitattributes= file:
 #+begin_src
 CANGES.md merge=filfre
 #+end_src
-** TODO Make change types configurable
-- [x] Load from config file
-- [ ] Make config file selectable by cli
+** DONE Make change types configurable
+- [X] Load from config file
+- [X] Make config file selectable by cli
+** TODO Make the changelog configurable
 ** TODO Add more robust, recursive git merge strategy
 ** TODO Add support for normal merging of text blocks?
