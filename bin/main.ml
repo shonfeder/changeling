@@ -5,12 +5,26 @@ let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 (** TODO Make config file configurable? *)
 let load_model file : ((module Changeling.Model.S), Rresult.R.msg) Result.t =
   let open Containers.Result.Infix in
-  let+ config = Config.load ?file () in
-  let (module C) = Changeling.Change.make ?kinds:config.changes () in
+  let+ { changes } = Config.load ?file () in
+  let (module C) = Changeling.Change.make changes in
   (module Changeling.Model.Make (C) : Changeling.Model.S)
 
 let changelog ?(name = "CHANGELOG") ?(nth = 0) () =
   Required.pos name ~doc:"The changelog file to format" ~nth ~conv:fpath_conv ()
+
+let model =
+  let+ config_file =
+    Optional.value
+      "CONFIG_FILE"
+      ~doc:
+        "Location of the configuration file to read (defaults to .changling in \
+         the currently working directoy)"
+      ~flags:[ "config"; "c" ]
+      ~default:None
+      ~conv:Arg.(some fpath_conv)
+      ()
+  in
+  load_model config_file
 
 let format =
   cmd
@@ -35,12 +49,10 @@ let format =
       ~flags:[ "fix"; "f" ]
       ~doc:"overwrite file with normalized formatting, if needed"
       ()
-  in
-  (* TODO DRY out the Model module making  *)
+  and+ m = model in
   let open Containers.Result.Infix in
-  let* (module Model) = load_model None in
-  let module Format = Format.Make (Model) in
-  Format.run changelog fix
+  let* m in
+  Format.run m changelog fix
 
 let release =
   cmd ~name:"release" ~doc:"Update the CHANGELOG for the release of VERSION"
@@ -52,11 +64,10 @@ let release =
          ~nth:1
          ~conv:Arg.string
          ()
-     in
+     and+ m = model in
      let open Containers.Result.Infix in
-     let* (module Model) = load_model None in
-     let module Release = Release.Make (Model) in
-     Release.run changelog version
+     let* m in
+     Release.run m changelog version
 
 let version =
   cmd
@@ -70,11 +81,10 @@ let version =
          ~nth:1
          ~conv:Arg.string
          ()
-     in
+     and+ m = model in
      let open Containers.Result.Infix in
-     let* (module Model) = load_model None in
-     let module Version = Version.Make (Model) in
-     Version.run changelog version
+     let* m in
+     Version.run m changelog version
 
 let merge =
   cmd ~name:"merge" ~doc:"Merge two changelogs into stdout"
@@ -90,19 +100,17 @@ let merge =
          ~default:None
          ~conv:Arg.(some fpath_conv)
          ()
-     in
+     and+ m = model in
      let open Containers.Result.Infix in
-     let* (module Model) = load_model None in
-     let module Merge = Merge.Make (Model) in
-     Merge.run changelog_a changelog_b dest
+     let* m in
+     Merge.run m changelog_a changelog_b dest
 
 let init =
   cmd ~name:"init" ~doc:"Initialize the git config for use with changeling"
-  @@ let+ changelog = changelog () in
+  @@ let+ changelog = changelog () and+ m = model in
      let open Containers.Result.Infix in
-     let* (module Model) = load_model None in
-     let module Init = Init.Make (Model) in
-     Init.run changelog
+     let* m in
+     Init.run m changelog
 
 let main () =
   Exec.commands

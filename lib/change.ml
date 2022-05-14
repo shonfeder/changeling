@@ -128,8 +128,5 @@ end) : S = struct
   end
 end
 
-(** The default change kinds, following the pattern in keep a changelog *)
-let default_kinds = [ "Added"; "Changed"; "Deprecated"; "Removed"; "Fixed"; "Security" ]
-
-let make ?(kinds=default_kinds) () : (module S) =
+let make kinds : (module S) =
   (module Make (struct let kinds = kinds end))

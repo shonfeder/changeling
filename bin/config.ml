@@ -1,15 +1,19 @@
 open Sexplib.Std
 open Containers
 
-type t = { changes : string list option } [@@deriving sexp]
+type t = { changes : string list [@default []] } [@@deriving sexp]
 
-let empty = { changes = None }
+(** The default change kinds, following the pattern in keep a changelog *)
+let changes =
+  [ "Added"; "Changed"; "Deprecated"; "Removed"; "Fixed"; "Security" ]
+
+let default = { changes }
 
 let load ?(file = Fpath.v ".changeling") () =
   let open Result.Infix in
   let* file_exists = Bos.OS.File.exists file in
   if not file_exists then
-    Ok empty
+    Ok default
   else
     let fname = Fpath.to_string file in
     let+ s =
