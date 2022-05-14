@@ -2,23 +2,23 @@ open Kwdcmd
 
 let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
 
-(** TODO Make config file configurable? *)
-let load_model file : ((module Changeling.Model.S), Rresult.R.msg) Result.t =
-  let open Containers.Result.Infix in
-  let+ { changes } = Config.load ?file () in
-  let (module C) = Changeling.Change.make changes in
-  (module Changeling.Model.Make (C) : Changeling.Model.S)
-
 let changelog ?(name = "CHANGELOG") ?(nth = 0) () =
   Required.pos name ~doc:"The changelog file to format" ~nth ~conv:fpath_conv ()
 
 let model =
+  let load_model file : ((module Changeling.Model.S), Rresult.R.msg) Result.t =
+    let open Containers.Result.Infix in
+    let+ { changes } = Config.load ?file () in
+    let (module C) = Changeling.Change.make changes in
+    (module Changeling.Model.Make (C) : Changeling.Model.S)
+  in
   let+ config_file =
     Optional.value
       "CONFIG_FILE"
       ~doc:
         "Location of the configuration file to read (defaults to .changling in \
          the currently working directoy)"
+      ~docs:Manpage.s_common_options
       ~flags:[ "config"; "c" ]
       ~default:None
       ~conv:Arg.(some fpath_conv)
