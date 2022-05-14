@@ -25,6 +25,7 @@
   ; Preprocessing
   (ppx_deriving (and (>= 5.2.1) (< 6.0.0)))
   (ppx_string (>= v0.15.0))
+  (ppx_sexp_conv (>= v0.15.1))
 
   ;  Testing
   (ppx_expect (>= v0.15.0))
