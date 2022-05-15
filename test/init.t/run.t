@@ -111,21 +111,21 @@ First, set up a simple changelog
 
 Commit the changes
 
-  $ git add . && git commit -m "Add changeling config" >/dev/null 2>&1
+  $ git add . && git commit -m "Add changeling config"
 
 Checkout a new branach and add a change
 
   $ git checkout -b conflict
   Switched to a new branch 'conflict'
   $ echo "- Change 2" >> CHANGES.md
-  $ git add . && git commit -m "Add change 2" >/dev/null 2>&1
+  $ git add . && git commit -m "Add change 2"
 
 Checkout the trunk again, and add a different change
 
   $ git checkout trunk
   Switched to branch 'trunk'
   $ echo "- Change 3" >> CHANGES.md
-  $ git add . && git commit -m "Add change 3" >/dev/null 2>&1
+  $ git add . && git commit -m "Add change 3"
 
 Merge the conflicting branch, showing that the changeling driver kicks in
 
