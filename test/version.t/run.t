@@ -1,6 +1,6 @@
 Can fetch unreleased version
 
-  $ changeling version changes.md Unreleased
+  $ changeling version Unreleased --changelog=changes.md
   ## Unreleased
   ### Added
   - Thing 1
@@ -12,7 +12,7 @@ Can fetch unreleased version
   
 Can fetch released version
 
-  $ changeling version changes.md 0.1.0
+  $ changeling version 0.1.0 --changelog=changes.md
   ## 0.1.0
   ### Fixed
   - Fixed 1
@@ -25,6 +25,6 @@ Can fetch released version
 
 Reports appropriate error when version is not in changelog
 
-  $ changeling version changes.md non-version
+  $ changeling version non-version --changelog=changes.md
   error: version non-version is not recorded in changes.md
   [1]

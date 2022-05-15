@@ -1,5 +1,4 @@
 open Containers
-open Changeling
 
 let config_marker_start = "# CHANGELING CONFIG START"
 
@@ -15,7 +14,7 @@ let config =
 %{config_marker_start}
 [merge "changeling"]
     name = changeling: changelog merge driver
-    driver = changeling merge %A %B --out %A
+    driver = changeling merge --changelog=%A %B --out %A
 %{config_marker_end}
 |}]
 
@@ -28,8 +27,8 @@ let attribute changelog =
 %{config_marker_end}
 |}]
 
-let run : (module Model.S) -> Fpath.t -> (unit, _) Kwdcmd.cmd_result =
- fun (module Model) changelog ->
+let run : Config.options -> (unit, _) Kwdcmd.cmd_result =
+ fun { model = (module Model); changelog } ->
   let open Result.Infix in
   let* changelog_exists = Bos.OS.File.exists changelog in
   let* () =

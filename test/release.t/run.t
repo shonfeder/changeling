@@ -22,7 +22,7 @@ Update release notes for the given release version
   ### Fixed
   
   ### Security
-  $ changeling release changes.md 0.0.1
+  $ changeling release 0.0.1 --changelog=changes.md
   $ cat changes.md
   # Changelog
   

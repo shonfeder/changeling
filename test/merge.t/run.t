@@ -1,6 +1,6 @@
 Can merge two compatible files
 
-  $ changeling merge changes_a.md changes_b.md
+  $ changeling merge --changelog=changes_a.md changes_b.md
   # Changelog
   
   Some summary data.
@@ -41,7 +41,7 @@ Can merge two compatible files
 
 Can merge two files into a given destination
 
-  $ changeling merge changes_a.md changes_b.md --out changes_c.md
+  $ changeling merge --changelog=changes_a.md changes_b.md --out changes_c.md
   $ cat changes_c.md
   # Changelog
   
@@ -83,18 +83,18 @@ Can merge two files into a given destination
 
 Trying to merge incompatible files produces an error
 
-  $ changeling merge changes_a.md title_conflict.md
+  $ changeling merge --changelog=changes_a.md title_conflict.md
   error: titles conflict: '# Changelog' <> '# Conflicting title'
   [1]
 
-  $ changeling merge changes_a.md summary_conflict.md
+  $ changeling merge --changelog=changes_a.md summary_conflict.md
   error: summaries conflict: 'Some summary data.' <> 'A conflicting summary.'
   [1]
 
-  $ changeling merge changes_a.md version_conflict.md
+  $ changeling merge --changelog=changes_a.md version_conflict.md
   error: versions conflict: '## 1.1.1' <> '## 1.1.2'
   [1]
 
-  $ changeling merge changes_a.md release_summary_conflict.md
+  $ changeling merge --changelog=changes_a.md release_summary_conflict.md
   error: release summaries conflict: 'Version summary' <> 'Version summary conflicts.'
   [1]

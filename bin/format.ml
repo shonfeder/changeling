@@ -1,8 +1,7 @@
 open Containers
-open Changeling
 
-let run : (module Model.S) -> Fpath.t -> bool -> (unit, _) Kwdcmd.cmd_result =
-  fun (module Model) changelog fix ->
+let run : bool -> Config.options -> (unit, _) Kwdcmd.cmd_result =
+ fun fix { model = (module Model); changelog } ->
   let open Result.Infix in
   let* contents = Bos.OS.File.read changelog in
   let* t = Model.parse contents in

@@ -1,30 +1,7 @@
 open Kwdcmd
+open Util
 
-let fpath_conv = Arg.(conv (Fpath.of_string, Fpath.pp))
-
-let changelog ?(name = "CHANGELOG") ?(nth = 0) () =
-  Required.pos name ~doc:"The changelog file to format" ~nth ~conv:fpath_conv ()
-
-let model =
-  let load_model file : ((module Changeling.Model.S), Rresult.R.msg) Result.t =
-    let open Containers.Result.Infix in
-    let+ { changes } = Config.load ?file () in
-    let (module C) = Changeling.Change.make changes in
-    (module Changeling.Model.Make (C) : Changeling.Model.S)
-  in
-  let+ config_file =
-    Optional.value
-      "CONFIG_FILE"
-      ~doc:
-        "Location of the configuration file to read (defaults to .changling in \
-         the currently working directoy)"
-      ~docs:Manpage.s_common_options
-      ~flags:[ "config"; "c" ]
-      ~default:None
-      ~conv:Arg.(some fpath_conv)
-      ()
-  in
-  load_model config_file
+let ( >>= ) = Containers.Result.Infix.( >>= )
 
 let format =
   cmd
@@ -42,54 +19,49 @@ let format =
           "Otherwise, if the structure is valid and the formatting normalized, \
            the command is a noop and exits with [0]."
       ]
-  @@ (* TODO: Should this be configurable? *)
-  let+ changelog = changelog ()
-  and+ fix =
-    Optional.flag
-      ~flags:[ "fix"; "f" ]
-      ~doc:"overwrite file with normalized formatting, if needed"
-      ()
-  and+ m = model in
-  let open Containers.Result.Infix in
-  let* m in
-  Format.run m changelog fix
+  @@ let+ fix =
+       Optional.flag
+         ~flags:[ "fix"; "f" ]
+         ~doc:"overwrite file with normalized formatting, if needed"
+         ()
+     and+ o = Config.options in
+     o >>= Format.run fix
 
 let release =
   cmd ~name:"release" ~doc:"Update the CHANGELOG for the release of VERSION"
-  @@ let+ changelog = changelog ()
-     and+ version =
+  @@ let+ version =
        Required.pos
          "VERSION"
          ~doc:"The version to be released"
-         ~nth:1
+         ~nth:0
          ~conv:Arg.string
          ()
-     and+ m = model in
-     let open Containers.Result.Infix in
-     let* m in
-     Release.run m changelog version
+     and+ o = Config.options in
+     o >>= Release.run version
 
 let version =
   cmd
     ~name:"version"
     ~doc:"Extracts just the changes for VERSION from CHANGELOG"
-  @@ let+ changelog = changelog ()
-     and+ version =
+  @@ let+ version =
        Required.pos
          "VERSION"
-         ~doc:"The version to be released"
-         ~nth:1
+         ~doc:"The version to be extract"
+         ~nth:0
          ~conv:Arg.string
          ()
-     and+ m = model in
-     let open Containers.Result.Infix in
-     let* m in
-     Version.run m changelog version
+     and+ o = Config.options in
+     o >>= Version.run version
 
 let merge =
   cmd ~name:"merge" ~doc:"Merge two changelogs into stdout"
-  @@ let+ changelog_a = changelog ~name:"CHANGELOG_A" ~nth:0 ()
-     and+ changelog_b = changelog ~name:"CHANGELOG_B" ~nth:1 ()
+  @@ let+ other_changelog =
+       Required.pos
+         "OTHER_CHANGELOG"
+         ~doc:"The changelog file to format"
+         ~nth:0
+         ~conv:Fpath.cmdline_conv
+         ()
      and+ dest =
        Optional.value
          "DESTINATION"
@@ -98,19 +70,15 @@ let merge =
            "Destination file to write merge result to. If omitted, writes \
             merged result to stdout"
          ~default:None
-         ~conv:Arg.(some fpath_conv)
+         ~conv:Arg.(some Fpath.cmdline_conv)
          ()
-     and+ m = model in
-     let open Containers.Result.Infix in
-     let* m in
-     Merge.run m changelog_a changelog_b dest
+     and+ o = Config.options in
+     o >>= Merge.run other_changelog dest
 
 let init =
   cmd ~name:"init" ~doc:"Initialize the git config for use with changeling"
-  @@ let+ changelog = changelog () and+ m = model in
-     let open Containers.Result.Infix in
-     let* m in
-     Init.run m changelog
+  @@ let+ o = Config.options in
+     o >>= Init.run
 
 let main () =
   Exec.commands

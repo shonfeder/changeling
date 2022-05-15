@@ -3,24 +3,24 @@ Errors
 
 On empty changelog
 
-  $ changeling format empty_changes.md
+  $ changeling format --changelog=empty_changes.md
   error: [invalid structure] empty changelog
   [1]
 
 On missing title
 
-  $ changeling format missing_title.md
+  $ changeling format --changelog=missing_title.md
   error: [invalid structure] expected '# Some title' but found '## Not an H1 title'
   [1]
 On missing "Unreleased" section
 
-  $ changeling format missing_unreleased.md
+  $ changeling format --changelog=missing_unreleased.md
   error: [invalid structure] expected '## Unreleased' section but found '## 1.1.1 - 2022-05-08'
   [1]
 
 On invald change sections
 
-  $ changeling format invalid_changes.md
+  $ changeling format --changelog=invalid_changes.md
   error: [invalid struture] expected change header but found '### Invalid change kind'
   [1]
 
@@ -29,7 +29,7 @@ Success
 
 Report unnormalized formatting of a valid changelog and print corrected format to stdout
 
-  $ changeling format CHANGES.md > CHANGES_CORRECTED.md
+  $ changeling format > CHANGES_CORRECTED.md
   error: format is not normalized; rerun with --fix
   [3]
 
@@ -47,7 +47,7 @@ Report unnormalized formatting of a valid changelog and print corrected format t
 
 Running on a normalized changelog succeeds quietly
 
-  $ changeling format CHANGES_CORRECTED.md
+  $ changeling format --changelog=CHANGES_CORRECTED.md
 
 Running with `--fix` will fix formatting of the file in place
 
@@ -81,7 +81,7 @@ Running with `--fix` will fix formatting of the file in place
   - Should
   - Be
   - First
-  $ changeling format --fix unordered_changes.md
+  $ changeling format --fix --changelog=unordered_changes.md
   $ cat unordered_changes.md
   # Changelog
   

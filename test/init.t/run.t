@@ -3,7 +3,7 @@ Errors
 
 Running outside of a git repo produces a warning
 
-  $ changeling init NONGIT_CHANGES.md
+  $ changeling init --changelog NONGIT_CHANGES.md
   warning: not running from root of git repository, git will not be configured
 
   $ ls -a
@@ -23,7 +23,7 @@ We need to be working in the root of a git repo to set up the git config
 
 Initialize the repo with the expected configuration files
 
-  $ changeling init CHANGES.md
+  $ changeling init
 
   $ ls -a
   .
@@ -39,7 +39,7 @@ The git config has the custom drier configured
   # CHANGELING CONFIG START
   [merge "changeling"]
       name = changeling: changelog merge driver
-      driver = changeling merge %A %B --out %A
+      driver = changeling merge --changelog=%A %B --out %A
   # CHANGELING CONFIG END
 
 The gitattributes configures the custom driver for the changelog
@@ -70,7 +70,7 @@ The generated changelog has the expected content
 
 Init is idempotent, and running it a second time is a noop
 
-  $ changeling init CHANGES.md
+  $ changeling init
 
   $ grep .git/config CHANGELING
   grep: CHANGELING: No such file or directory

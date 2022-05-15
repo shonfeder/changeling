@@ -129,6 +129,8 @@ CANGES.md merge=filfre
 ** DONE Make change types configurable
 - [X] Load from config file
 - [X] Make config file selectable by cli
-** TODO Make the changelog configurable
+** DONE Make the changelog configurable
 ** TODO Add more robust, recursive git merge strategy
 ** TODO Add support for normal merging of text blocks?
+** TODO Add links to issues and hashes, and add date
+** TODO During init, derive allowed change kinds from existing changelog file
