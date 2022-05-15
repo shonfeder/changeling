@@ -109,6 +109,11 @@ First, set up a simple changelog
 
   $ printf "# Changelog\n\n## Unreleased\n\n### Added\n\n- Change 1\n" > CHANGES.md
 
+Set up git for the repo (required for CI)
+
+  $ git config user.name "changeling-tests"
+  $ git config user.email nope@example.com
+
 Commit the changes
 
   $ git add . && git commit -m "Add changeling config"
