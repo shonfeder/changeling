@@ -1,29 +1,6 @@
 open Containers
 module Omd = Omd_ext
 
-(** TODO *)
-module ApalacheChange = struct
-  module T = struct
-    (* TODO: make configurable *)
-    type t =
-      | Breaking_changes
-      | Bug_fixes
-      | Deprecations
-      | Features
-      | Documentation
-    [@@deriving eq, ord]
-  end
-
-  include T
-
-  let to_string = function
-    | Breaking_changes -> "Breaking changes"
-    | Features         -> "Features"
-    | Bug_fixes        -> "Bug fixes"
-    | Deprecations     -> "Deprecations"
-    | Documentation    -> "Documentation"
-end
-
 module type S = sig
   type t = private string
 
